@@ -7,7 +7,7 @@ INC_DIR := include
 
 # Step 2: Import files
 SOURCES := $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c)
-INCLUDES := -I$(INC_DIR)/
+INCLUDES := -I$(INC_DIR) -I$(INC_DIR)/motor -I$(INC_DIR)/lcd -I$(INC_DIR)/temp
 
 # Step 3: create name of the final target
 TARGET := main
@@ -29,9 +29,11 @@ DEPS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(SOURCES))
 -include $(DEPS)
 
 # Step 6: Create recipes
-# Note: This recipe is to create assembly for a single source file
+# Note: 
+# - Create directory by extracting the directory portion of the path
+# - This recipe is to create assembly for a single source file
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(INCLUDES) -MMD -MP -MF $(BUILD_DIR)/$*.d -c $< -o $@
 
 # Step 7: Create rules
@@ -51,8 +53,9 @@ $(TARGET).asm: $(BUILD_DIR)/$(TARGET).out
 
 .PHONY: clean
 clean:
-	rm $(BUILD_DIR)/*
+	rm -rf $(BUILD_DIR)
 
+# Run should be dependent on the final target
 .PHONY: run
-run:
-	./build/main.out
+run: $(BUILD_DIR)/$(TARGET).out
+	./$<
