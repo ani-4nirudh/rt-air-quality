@@ -6,11 +6,10 @@ SRC_DIR := src
 INC_DIR := include
 LINKER_DIR := linker
 EXT_DIR := external
-STARTUP_DIR := $(SRC_DIR)/f446re
 
 # Step 2: Import files
 SOURCES := $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c)
-STARTUP_SOURCE := $(wildcard $(STARTUP_DIR)/*.S)
+STARTUP_SOURCE := $(wildcard $(SRC_DIR)/*/*.S)
 EXT_SOURCES := $(wildcard $(EXT_DIR)/*/*.c)
 INCLUDES := -I$(INC_DIR) -I$(EXT_DIR)/printf -I$(INC_DIR)/motor -I$(INC_DIR)/lcd -I$(INC_DIR)/temp
 
@@ -38,7 +37,7 @@ CFLAGS := $(WFLAGS) -std=c99 -g -Og
 # Step 5: Create names for the files
 # Note: Substitute the object files with the same name as the sources with a different extension (input, replacement, the actual text)
 OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
-STARTUP_OBJECTS := $(patsubst $(STARTUP_DIR)/%.S,$(BUILD_DIR)/%.o,$(STARTUP_SOURCE))
+STARTUP_OBJECTS := $(patsubst $(SRC_DIR)/%.S,$(BUILD_DIR)/%.o,$(STARTUP_SOURCE))
 EXT_OBJECTS := $(patsubst $(EXT_DIR)/$.c,$(BUILD_DIR)/%.o,$(EXT_SOURCES))
 DEPS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(SOURCES))
 
@@ -54,7 +53,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) $(INCLUDES) -MMD -MP -MF $(BUILD_DIR)/$*.d -c $< -o $@
 
 # Build the board startup assembly file into an object
-$(BUILD_DIR)/%.o: $(STARTUP_DIR)/%.S
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) -c $< -o $@
 
