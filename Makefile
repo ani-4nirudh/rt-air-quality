@@ -4,18 +4,31 @@
 BUILD_DIR := build
 SRC_DIR := src
 INC_DIR := include
+LINKER_DIR := linker
+STARTUP_DIR := $(SRC_DIR)/f446re
 
 # Step 2: Import files
+STARTUP_SOURCE := $(wildcard $(STARTUP_DIR)/*.S)
 SOURCES := $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c)
 INCLUDES := -I$(INC_DIR) -I$(INC_DIR)/motor -I$(INC_DIR)/lcd -I$(INC_DIR)/temp
 
 # Step 3: create name of the final target
 TARGET := main
 
-# Step 4: Setup flags
-CC := gcc
-WFLAGS = -Wall -Wpedantic -Wextra -Wshadow -Werror
+# Step 4: Setup flags based on platform
+CC := arm-none-eabi-gcc
+LINKER_FILE := -T $(LINKER_DIR)/stm32f446xe_flash.ld
+CPU := -mcpu=cortex-m4
+ARCH_FLAGS := -mthumb \
+							-mfloat-abi=hard \
+							-mfpu=fpv4-sp-d16 \
+							--specs=nosys.specs
 CPPFLAGS :=
+LDFLAGS := $(LINKER_FILE) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map
+OBJDUMP := arm-none-eabi-objdump
+SIZE := arm-none-eabi-size
+
+WFLAGS = -Wall -Wpedantic -Wextra -Wshadow -Werror
 
 # Note: Compile with debug optimisation and debug flags enabled
 CFLAGS := $(WFLAGS) -std=c99 -g -Og
@@ -24,6 +37,7 @@ CFLAGS := $(WFLAGS) -std=c99 -g -Og
 # Note: Substitute the object files with the same name as the sources with a different extension (input, replacement, the actual text)
 OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
 DEPS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(SOURCES))
+STARTUP_OBJ := $(patsubst $(STARTUP_DIR)/%.S,$(BUILD_DIR)/%.o,$(STARTUP_SOURCE))
 
 # Note: Read header file dependencies when available
 -include $(DEPS)
@@ -34,7 +48,12 @@ DEPS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(SOURCES))
 # - This recipe is to create assembly for a single source file
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(INCLUDES) -MMD -MP -MF $(BUILD_DIR)/$*.d -c $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) $(INCLUDES) -MMD -MP -MF $(BUILD_DIR)/$*.d -c $< -o $@
+
+# Build the board startup assembly file into an object
+$(BUILD_DIR)/%.o: $(STARTUP_DIR)/%.S
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) -c $< -o $@
 
 # Step 7: Create rules
 .PHONY: compile-all
@@ -42,14 +61,15 @@ compile-all: $(OBJECTS)
 
 .PHONY: build
 build: $(BUILD_DIR)/$(TARGET).out
-$(BUILD_DIR)/$(TARGET).out: $(OBJECTS)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(INCLUDES) $^ -o $@
-	size $@
+$(BUILD_DIR)/$(TARGET).out: $(OBJECTS) $(STARTUP_OBJ)
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) $(INCLUDES) $(LDFLAGS) $^ -o $@
+	$(SIZE) $@
 
 # Note: This is to create assembly for the final linked binary by disassembling the it and showing the original C code alongside the assembly
 .PHONY: $(TARGET).asm
 $(TARGET).asm: $(BUILD_DIR)/$(TARGET).out
-	objdump -S $< > $(BUILD_DIR)/$@
+	$(OBJDUMP) -S $< > $(BUILD_DIR)/$@
 
 .PHONY: clean
 clean:
@@ -58,4 +78,4 @@ clean:
 # Run should be dependent on the final target
 .PHONY: run
 run: $(BUILD_DIR)/$(TARGET).out
-	./$<
+	./$@
