@@ -5,12 +5,14 @@ BUILD_DIR := build
 SRC_DIR := src
 INC_DIR := include
 LINKER_DIR := linker
+EXT_DIR := external
 STARTUP_DIR := $(SRC_DIR)/f446re
 
 # Step 2: Import files
-STARTUP_SOURCE := $(wildcard $(STARTUP_DIR)/*.S)
 SOURCES := $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c)
-INCLUDES := -I$(INC_DIR) -I$(INC_DIR)/motor -I$(INC_DIR)/lcd -I$(INC_DIR)/temp
+STARTUP_SOURCE := $(wildcard $(STARTUP_DIR)/*.S)
+EXT_SOURCES := $(wildcard $(EXT_DIR)/*/*.c)
+INCLUDES := -I$(INC_DIR) -I$(EXT_DIR)/printf -I$(INC_DIR)/motor -I$(INC_DIR)/lcd -I$(INC_DIR)/temp
 
 # Step 3: create name of the final target
 TARGET := main
@@ -36,8 +38,9 @@ CFLAGS := $(WFLAGS) -std=c99 -g -Og
 # Step 5: Create names for the files
 # Note: Substitute the object files with the same name as the sources with a different extension (input, replacement, the actual text)
 OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
+STARTUP_OBJECTS := $(patsubst $(STARTUP_DIR)/%.S,$(BUILD_DIR)/%.o,$(STARTUP_SOURCE))
+EXT_OBJECTS := $(patsubst $(EXT_DIR)/$.c,$(BUILD_DIR)/%.o,$(EXT_SOURCES))
 DEPS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(SOURCES))
-STARTUP_OBJ := $(patsubst $(STARTUP_DIR)/%.S,$(BUILD_DIR)/%.o,$(STARTUP_SOURCE))
 
 # Note: Read header file dependencies when available
 -include $(DEPS)
@@ -61,7 +64,7 @@ compile-all: $(OBJECTS)
 
 .PHONY: build
 build: $(BUILD_DIR)/$(TARGET).out
-$(BUILD_DIR)/$(TARGET).out: $(OBJECTS) $(STARTUP_OBJ)
+$(BUILD_DIR)/$(TARGET).out: $(OBJECTS) $(STARTUP_OBJECTS) $(EXT_OBJECTS)
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) $(INCLUDES) $(LDFLAGS) $^ -o $@
 	$(SIZE) $@
@@ -78,4 +81,4 @@ clean:
 # Run should be dependent on the final target
 .PHONY: run
 run: $(BUILD_DIR)/$(TARGET).out
-	./$@
+	./$<
