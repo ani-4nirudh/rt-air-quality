@@ -1,6 +1,5 @@
-#include <stdio.h>
-
 #include "motor.h"
+#include "printf.h"
 
 int main(void) {
   printf("Hello world!\n");
