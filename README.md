@@ -1,5 +1,5 @@
-# Real-time Motor Control
-
+# Real-time Motor Control (In Progress)
+WIP. Please wait for the final instructions.
 ## Overview
 
 ## Build Instructions
@@ -15,6 +15,9 @@ make run
 
 
 ## Architecture
+- System diagrams
 
 ### Additional Documentation
+- Hardware
+- Pinout
 
