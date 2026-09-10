@@ -1,5 +1,6 @@
 # Real-time Motor Control (In Progress)
-WIP. Please wait for the final instructions.
+**WIP**
+*Please wait for the final instructions.*
 ## Overview
 
 ## Build Instructions
