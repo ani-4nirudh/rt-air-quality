@@ -1,4 +1,4 @@
-# Real-time Motor Control (In Progress)
+# Real-time Air Quality Sensor (In Progress)
 **WIP**
 *Please wait for the final instructions.*
 ## Overview
