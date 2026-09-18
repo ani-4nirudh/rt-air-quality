@@ -1,6 +1,0 @@
-[submodule "ext_submodules/FreeRTOS"]
-	path = ext_submodules/FreeRTOS
-	url = https://github.com/FreeRTOS/FreeRTOS.git
-[submodule "ext_submodules/STM32CubeF4"]
-	path = ext_submodules/STM32CubeF4
-	url = https://github.com/STMicroelectronics/STM32CubeF4.git
