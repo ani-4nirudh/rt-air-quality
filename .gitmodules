@@ -4,6 +4,3 @@
 [submodule "external/STM32CubeF4"]
 	path = external/STM32CubeF4
 	url = https://github.com/STMicroelectronics/STM32CubeF4.git
-[submodule "external/FreeRTOS"]
-	path = external/FreeRTOS
-	url = https://github.com/FreeRTOS/FreeRTOS.git
