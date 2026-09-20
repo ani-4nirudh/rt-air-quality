@@ -4,3 +4,6 @@
 [submodule "ext_submodules/STM32CubeF4"]
 	path = ext_submodules/STM32CubeF4
 	url = https://github.com/STMicroelectronics/STM32CubeF4.git
+[submodule "ext_submodules/code"]
+	path = ext_submodules/code
+	url = git://git.code.sf.net/p/openocd/code
