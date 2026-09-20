@@ -7,27 +7,32 @@ TARGET := main
 
 # Step 4: Setup flags based on platform
 CC := arm-none-eabi-gcc
-LINKER_FILE := -T $(LINKER_DIR)/stm32f446xe_flash.ld
+LINKER_FLASH := -T $(LINKER_DIR)/STM32F446RETX_FLASH.ld
 CPU := -mcpu=cortex-m4
 ARCH_FLAGS := -mthumb \
 							-mfloat-abi=hard \
 							-mfpu=fpv4-sp-d16 \
-							--specs=nosys.specs
+							-ffunction-sections \
+							-fdata-sections \
+							-fstack-usage \
+							-fcyclomatic-complexity \
+							--specs=nano.specs
+
 CPPFLAGS :=
-LDFLAGS := $(LINKER_FILE) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map
+LDFLAGS := $(LINKER_FLASH) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map
 OBJDUMP := arm-none-eabi-objdump
 SIZE := arm-none-eabi-size
 
 WFLAGS = -Wall -Wpedantic -Wextra -Wshadow -Werror
 
 # Note: Compile with maximum debug info and zero optimisation
-CFLAGS := $(WFLAGS) -std=gnu11 -g3 -O0
+CFLAGS := $(WFLAGS) -std=gnu11 -g3 -O0 -DSTM32F446xx
 
 # Step 5: Create names for the files
 # Note: Substitute the object files with the same name as the sources with a different extension (input, replacement, the actual text)
 OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
 STARTUP_OBJECTS := $(patsubst $(SRC_DIR)/%.S,$(BUILD_DIR)/%.o,$(STARTUP_SOURCE))
-EXT_OBJECTS := $(patsubst $(EXT_DIR)/$.c,$(BUILD_DIR)/%.o,$(EXT_SOURCES))
+# EXT_OBJECTS := $(patsubst $(EXT_DIR)/$.c,$(BUILD_DIR)/%.o,$(EXT_SOURCES))
 DEPS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(SOURCES))
 
 # Note: Read header file dependencies when available

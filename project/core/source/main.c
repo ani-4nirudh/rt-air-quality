@@ -6,7 +6,7 @@
 
 #include "FreeRTOSConfig.h"
 #include "FreeRTOSTasks.h"
-#include "mcu.h"
+#include "stm32f4xx.h"
 
 #define LED_PIN 5U
 

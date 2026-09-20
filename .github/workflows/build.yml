@@ -1,0 +1,27 @@
+name: Build with Arm GCC
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout/v4
+
+      - name: Install ARM GNU Toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          releases: '14.3.Rel1'
+
+      - name: Show compiler version
+        run: arm-none-eabi-gcc --version
+
+      - name: Build project
+        working-directory: project
+        run: 
