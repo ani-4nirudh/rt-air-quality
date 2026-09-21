@@ -17,11 +17,12 @@ jobs:
       - name: Install ARM GNU Toolchain
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          releases: '14.3.Rel1'
+          release: '14.3.Rel1'
 
       - name: Show compiler version
         run: arm-none-eabi-gcc --version
 
       - name: Build project
         working-directory: project
-        run: 
+        run:
+          make build
