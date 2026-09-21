@@ -11,9 +11,6 @@ sudo apt install openocd
 # Compile and build the final executable
 cd project
 make build
-
-
-
 ```
 
 ## Hardware
