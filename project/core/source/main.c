@@ -16,8 +16,8 @@ static volatile uint8_t stage = 0;
  * Start Task Prototype
  */
 // static void startup(void);
-// static void led_init(void);
-// static void blink(void);
+static void led_init(void);
+static void blink(void);
 
 int main(void) {
   /**
