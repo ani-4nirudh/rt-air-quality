@@ -1,11 +1,12 @@
 # Makefile
 
+# Step 1: Include the sources
 include sources.mk
 
-# Step 3: create name of the final target
+# Step 2: create name of the final target
 TARGET := main
 
-# Step 4: Setup flags based on platform
+# Step 3: Setup flags based on platform
 CC := arm-none-eabi-gcc
 LINKER_FLASH := -T $(LINKER_DIR)/STM32F446RETX_FLASH.ld
 CPU := -mcpu=cortex-m4
@@ -27,14 +28,11 @@ WFLAGS = -Wall -Wpedantic -Wextra -Wshadow -Werror
 # Note: Compile with maximum debug info and zero optimisation
 CFLAGS := $(WFLAGS) -std=gnu11 -g3 -O0 -DSTM32F446xx
 
-# Step 5: Create names for the files
+# Step 4: Create names for the files
 # Note: Substitute the object files with the same name as the sources with a different extension (input, replacement, the actual text)
 OBJECTS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SOURCES))
-STARTUP_OBJECTS := $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/$(STARTUP_DIR)/%.o,$(STARTUP_SOURCE))
-
+STARTUP_OBJECTS := $(patsubst %.s,$(BUILD_DIR)/%.o,$(STARTUP_SOURCE))
 ALL_OBJS := $(OBJECTS) $(STARTUP_OBJECTS)
-
-# FREERTOS_OBJECTS := $(patsubst $(FREERTOS_DIR)/Source/%.c,$(BUILD_DIR)/$(FREERTOS_DIR)/Source/%.o,$(FREERTOS_SOURCES))
 
 # Dependencies
 DEPS := $(patsubst %.c,$(BUILD_DIR)/%.d,$(SOURCES))
@@ -49,7 +47,7 @@ $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) $(INCLUDES) -MMD -MP -MF $(BUILD_DIR)/$*.d -c $< -o $@
 
 # Build the board startup assembly file into an object
-$(BUILD_DIR)/$(STARTUP_DIR)/%.o: $(STARTUP_DIR)/%.s
+$(BUILD_DIR)/%.o: %.s
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) -c $< -o $@
 
