@@ -40,7 +40,7 @@
  *----------------------------------------------------------*/
 
 // Ensure SystemCoreClock variable declared
-#include "mcu.h"
+#include "stm32f4xx.h"
 
 /* Ensure stdint is only used by the compiler, and not the assembler. */
 #ifdef __ICCARM__
