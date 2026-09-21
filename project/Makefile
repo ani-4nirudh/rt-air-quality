@@ -8,6 +8,7 @@ TARGET := main
 
 # Step 3: Setup flags based on platform
 CC := arm-none-eabi-gcc
+OPENOCD := openocd
 LINKER_FLASH := -T $(LINKER_DIR)/STM32F446RETX_FLASH.ld
 CPU := -mcpu=cortex-m4
 ARCH_FLAGS := -mthumb \
@@ -59,6 +60,10 @@ $(BUILD_DIR)/$(TARGET).out: $(ALL_OBJS)
 .PHONY: build
 build: $(BUILD_DIR)/$(TARGET).out
 
+.PHONY: flash
+flash: $(BUILD_DIR)/$(TARGET).out
+	$(OPENOCD) -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(BUILD_DIR)/$(TARGET).out verify reset exit"
+
 # Note: This is to create assembly for the final linked binary by disassembling the it and showing the original C code alongside the assembly
 .PHONY: $(TARGET).asm
 $(TARGET).asm: $(BUILD_DIR)/$(TARGET).out
@@ -67,8 +72,3 @@ $(TARGET).asm: $(BUILD_DIR)/$(TARGET).out
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
-
-# Run should be dependent on the final target
-.PHONY: run
-run: $(BUILD_DIR)/$(TARGET).out
-	./$<
