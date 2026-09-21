@@ -37,7 +37,7 @@ ALL_OBJS := $(OBJECTS) $(STARTUP_OBJECTS)
 # FREERTOS_OBJECTS := $(patsubst $(FREERTOS_DIR)/Source/%.c,$(BUILD_DIR)/$(FREERTOS_DIR)/Source/%.o,$(FREERTOS_SOURCES))
 
 # Dependencies
-DEPS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/$(SRC_DIR)/%.d,$(SOURCES))
+DEPS := $(patsubst %.c,$(BUILD_DIR)/%.d,$(SOURCES))
 -include $(DEPS)
 
 # Step 6: Create recipes
@@ -50,11 +50,6 @@ $(BUILD_DIR)/%.o: %.c
 
 # Build the board startup assembly file into an object
 $(BUILD_DIR)/$(STARTUP_DIR)/%.o: $(STARTUP_DIR)/%.s
-	@mkdir -p $(dir $@)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) -c $< -o $@
-
-# Build the FreeRTOS object
-$(BUILD_DIR)/$(FREERTOS_DIR)/Source/%.o: $(FREERTOS_DIR)/%.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) -c $< -o $@
 
