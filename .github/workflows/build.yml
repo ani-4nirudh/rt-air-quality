@@ -25,4 +25,4 @@ jobs:
       - name: Build project
         working-directory: project
         run:
-          make flash
+          make build
