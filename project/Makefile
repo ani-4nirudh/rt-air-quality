@@ -15,7 +15,6 @@ ARCH_FLAGS := -mthumb \
 							-ffunction-sections \
 							-fdata-sections \
 							-fstack-usage \
-							-fcyclomatic-complexity \
 							--specs=nano.specs
 
 CPPFLAGS :=
