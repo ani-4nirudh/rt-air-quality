@@ -29,37 +29,42 @@ CFLAGS := $(WFLAGS) -std=gnu11 -g3 -O0 -DSTM32F446xx
 
 # Step 5: Create names for the files
 # Note: Substitute the object files with the same name as the sources with a different extension (input, replacement, the actual text)
-OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCES))
-STARTUP_OBJECTS := $(patsubst $(SRC_DIR)/%.S,$(BUILD_DIR)/%.o,$(STARTUP_SOURCE))
-# EXT_OBJECTS := $(patsubst $(EXT_DIR)/$.c,$(BUILD_DIR)/%.o,$(EXT_SOURCES))
-DEPS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.d,$(SOURCES))
+OBJECTS := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SOURCES))
+STARTUP_OBJECTS := $(patsubst $(STARTUP_DIR)/%.s,$(BUILD_DIR)/$(STARTUP_DIR)/%.o,$(STARTUP_SOURCE))
 
-# Note: Read header file dependencies when available
+ALL_OBJS := $(OBJECTS) $(STARTUP_OBJECTS)
+
+# FREERTOS_OBJECTS := $(patsubst $(FREERTOS_DIR)/Source/%.c,$(BUILD_DIR)/$(FREERTOS_DIR)/Source/%.o,$(FREERTOS_SOURCES))
+
+# Dependencies
+DEPS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/$(SRC_DIR)/%.d,$(SOURCES))
 -include $(DEPS)
 
 # Step 6: Create recipes
 # Note: 
 # - Create directory by extracting the directory portion of the path
 # - This recipe is to create assembly for a single source file
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+$(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) $(INCLUDES) -MMD -MP -MF $(BUILD_DIR)/$*.d -c $< -o $@
 
 # Build the board startup assembly file into an object
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
+$(BUILD_DIR)/$(STARTUP_DIR)/%.o: $(STARTUP_DIR)/%.s
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) -c $< -o $@
 
-# Step 7: Create rules
-.PHONY: compile-all
-compile-all: $(OBJECTS)
+# Build the FreeRTOS object
+$(BUILD_DIR)/$(FREERTOS_DIR)/Source/%.o: $(FREERTOS_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) -c $< -o $@
 
-.PHONY: build
-build: $(BUILD_DIR)/$(TARGET).out
-$(BUILD_DIR)/$(TARGET).out: $(OBJECTS) $(STARTUP_OBJECTS) $(EXT_OBJECTS)
+$(BUILD_DIR)/$(TARGET).out: $(ALL_OBJS)
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) $(INCLUDES) $(LDFLAGS) $^ -o $@
 	$(SIZE) $@
+
+.PHONY: build
+build: $(BUILD_DIR)/$(TARGET).out
 
 # Note: This is to create assembly for the final linked binary by disassembling the it and showing the original C code alongside the assembly
 .PHONY: $(TARGET).asm
