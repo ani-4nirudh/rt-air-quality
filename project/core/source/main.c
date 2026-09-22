@@ -58,7 +58,7 @@ void blink_task(void *argument) {
 
   while (1) {
     led_toggle();
-    vTaskDelay(pdMS_TO_TICKS(500));
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
 
   vTaskDelete(NULL);
