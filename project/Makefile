@@ -18,12 +18,12 @@ ARCH_FLAGS := -mthumb \
 							-fdata-sections \
 							-fstack-usage \
 							--specs=nano.specs
-
 CPPFLAGS :=
 LDFLAGS := $(LINKER_FLASH) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map
 OBJDUMP := arm-none-eabi-objdump
 SIZE := arm-none-eabi-size
 
+# Add warning flags
 WFLAGS = -Wall -Wpedantic -Wextra -Wshadow -Werror
 
 # Note: Compile with maximum debug info and zero optimisation
@@ -48,6 +48,7 @@ $(BUILD_DIR)/%.o: %.c
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) $(INCLUDES) -MMD -MP -MF $(BUILD_DIR)/$*.d -c $< -o $@
 
 # Build the board startup assembly file into an object
+# Separate rule as it's a '.s' file
 $(BUILD_DIR)/%.o: %.s
 	@mkdir -p $(dir $@)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(CPU) $(ARCH_FLAGS) -c $< -o $@
