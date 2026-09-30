@@ -30,5 +30,6 @@ INCLUDES := -I./cmsis \
 						-I./core/include \
 						-I./core/source \
 						-I./peripherals/include \
+						-I./peripherals/source \
 						-I$(FREERTOS_DIR)/Source/portable/GCC/ARM_CM4F \
 						-I$(FREERTOS_DIR)/Source/include/ 
