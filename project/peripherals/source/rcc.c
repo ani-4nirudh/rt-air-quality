@@ -20,13 +20,19 @@
 static uint8_t rcc_get_pllp(uint8_t mcu_hw_mhz) {
   if ((mcu_hw_mhz * 8) <= RCC_MAX_VCO_FREQ) {
     return 8;
-  } else if ((mcu_hw_mhz * 6) <= RCC_MAX_VCO_FREQ) {
-    return 6;
-  } else if ((mcu_hw_mhz * 4) <= RCC_MAX_VCO_FREQ) {
-    return 4;
-  } else if ((mcu_hw_mhz * 2) <= RCC_MAX_VCO_FREQ) {
-    return 2;
   }
+
+  if ((mcu_hw_mhz * 6) <= RCC_MAX_VCO_FREQ) {
+    return 6;
+  }
+
+  if ((mcu_hw_mhz * 4) <= RCC_MAX_VCO_FREQ) {
+    return 4;
+  }
+
+  // if ((mcu_hw_mhz * 2) <= RCC_MAX_VCO_FREQ)
+  // Return 2 otherwise
+  return 2;
 }
 
 /**
@@ -84,7 +90,7 @@ void rcc_init(void) {
   rcc_pll_source(RCC_PLL_SRC_HSE);
   rcc_pll_config(sysclk_freq_mhz);
   rcc_pll_enable();
-  rcc_ahb_set_prescalar(RCC_SYSCLK_DIV_1);
+  rcc_ahb_set_prescaler(RCC_SYSCLK_DIV_1);
   rcc_sysclk_set_source(RCC_SYSCLK_SRC_PLLP);
 
   while (RCC_CFGR_SWS_PLL != rcc_sysclk_get_source())
@@ -92,6 +98,6 @@ void rcc_init(void) {
 
   rcc_hsi_disable();
 
-  rcc_apb1_set_prescalar(RCC_APB1_DIV_4);
-  rcc_apb2_set_prescalar(RCC_APB2_DIV_4);
+  rcc_apb1_set_prescaler(RCC_APB1_DIV_4);
+  rcc_apb2_set_prescaler(RCC_APB2_DIV_4);
 }
