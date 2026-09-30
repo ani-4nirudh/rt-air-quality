@@ -11,7 +11,7 @@
 
 void flash_config_wait_states(uint8_t hclk) {
 
-  // Clear bits in the registerN
+  // Clear bits in the register
   FLASH->ACR &= ~(FLASH_ACR_LATENCY | FLASH_ACR_PRFTEN | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_ICRST | FLASH_ACR_DCRST);
 
   // Set the following bits
@@ -19,8 +19,8 @@ void flash_config_wait_states(uint8_t hclk) {
 
   /**
   * Calculate the number of wait states (WS)
-  * Because at 30Mhz WS should be zero, 1 is subtracted.
-  * The division is done by 30 because of the HCLK range in the column 1 of Table 5.
+  * Because at 30 MHz WS should be zero, 1 is subtracted.
+  * The division is done by 30 because of the HCLK range in the column 1 of Table 5 (Page 66 of the datasheet).
   */
   uint8_t latency = (hclk - 1) / 30;
 
