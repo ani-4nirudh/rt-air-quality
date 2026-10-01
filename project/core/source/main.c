@@ -6,6 +6,7 @@
 
 #include "FreeRTOSConfig.h"
 #include "FreeRTOSTasks.h"
+#include "rcc.h"
 #include "stm32f4xx.h"
 
 #define LED_PIN 5U
@@ -20,6 +21,33 @@ static void led_init(void);
 static void blink(void);
 
 int main(void) {
+  /**
+   * Initial RCC configuration test
+   */
+  uint32_t system_clock = 0;
+  uint32_t hclk = 0;
+  uint32_t apb1_clock = 0;
+  uint32_t apb2_clock = 0;
+
+  rcc_init();
+  system_clock = rcc_get_sysclk_freq();
+  hclk = rcc_get_hclk_freq();
+  apb1_clock = rcc_get_pclk1_freq();
+  apb2_clock = rcc_get_pclk2_freq();
+
+  (void)system_clock;
+  (void)hclk;
+  (void)apb1_clock;
+  (void)apb2_clock;
+
+  /**
+   * (gdb) target extended-remote localhost:3333
+   * (gdb) monitor reset halt
+   * (gdb) load
+   * (gdb) break main
+   * (gdb) continue
+   */
+
   /**
    * Update the 'SystemCoreClock' variable required by FreeRTOS
    */
