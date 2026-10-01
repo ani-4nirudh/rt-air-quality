@@ -10,53 +10,31 @@
 #include "flash.h"
 
 /**
- * Get the PLLP division factor based on the maximum VCO frequency of the MCU
- *  - We are basically backtracking inside the clock tree from the SYSCLK
- *  - PLLP can only have 4 values: 2, 4, 6, 8
- *  - The Constraint: SYSCLK * PLLP <= 432 MHz (Max. VCO)
- * @param mcu_hw_mhz HCLK hardware clock frequency to drive the CPU
- * @return PLLP divisor
- */
-static uint8_t rcc_get_pllp(uint8_t mcu_hw_mhz) {
-  if ((mcu_hw_mhz * 8) <= RCC_MAX_VCO_FREQ) {
-    return 8;
-  }
-
-  if ((mcu_hw_mhz * 6) <= RCC_MAX_VCO_FREQ) {
-    return 6;
-  }
-
-  if ((mcu_hw_mhz * 4) <= RCC_MAX_VCO_FREQ) {
-    return 4;
-  }
-
-  // if ((mcu_hw_mhz * 2) <= RCC_MAX_VCO_FREQ)
-  // Return 2 otherwise
-  return 2;
-}
-
-/**
- * Set the PLLN, PLLM and PLLP registers
- * @param sysclk_freq_mhz System clockspeed the CPU runs at
+ * Configuring the PLL clock source so that SYSCLK runs at 180 MHz
  */
 
-static void rcc_pll_config(uint8_t sysclk_freq_mhz) {
-  uint8_t PLLP = 0;
-  uint16_t PLLN = 0;
-  uint8_t PLLM = RCC_HSE_MHZ;
+static void rcc_pll_config(void) {
 
-  if (sysclk_freq_mhz > RCC_MAX_SYSCLK_MHZ) {
-    sysclk_freq_mhz = RCC_MAX_SYSCLK_MHZ;
-  }
+  // Disable the PLL before configuration. i.e. PLLON and PLLRDY are set to 0
+  RCC->CR &= ~(RCC_CR_PLLON);
+  while (RCC->CR & RCC_CR_PLLRDY)
+    ;
 
-  // Get the PLLP and PLLN
-  PLLP = rcc_get_pllp(sysclk_freq_mhz);
-  PLLN = sysclk_freq_mhz * PLLP;
+  /**
+   * We want to run the CPU at 180 MHz. HSE -> PLL -> SYSCLK -> HCLK -> APB1 & APB2 clocks (Sources are left to right)
+   * Because HSE is a 8 MHz crystal, and for using PLL as a clock source, 2 MHz is minimum recommended frequency for VCO input to avoid jitter.
+   * VCO output frquency is limited to 432 MHz.
+   */
+  uint32_t PLLM = 4U; // Lower means higher VCO_input frequency
+  uint32_t PLLN = 180U;
+  uint32_t VCO_input = RCC_HSE_MHZ / PLLM;         // 2 MHz
+  uint32_t VCO_output = VCO_input * PLLN;          // 360 MHz < 432 MHz
+  uint32_t PLLP = VCO_output / RCC_MAX_SYSCLK_MHZ; // 2 (Permissible values: 2, 4, 6, 8)
 
   // Set the PLLP Register
   // This conversion is necessary because 2 is encoded for the binary number 00
   // In PLLM and PLLN, the binary corresponds to the calculated unsigned integer.
-  PLLP = (PLLP / 2) - 1;
+  PLLP = (PLLP / 2U) - 1U;
   RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLP);
   RCC->PLLCFGR |= PLLP << RCC_PLLCFGR_PLLP_Pos;
 
@@ -77,32 +55,25 @@ static void rcc_pll_config(uint8_t sysclk_freq_mhz) {
  * - Set SYSCLK
  * - Configure flash wait states
  * - Enable the HSE
- * - Disable the PLL
  * - Configure the PLL as the clock source
  * - Enable the PLL
  * - Wait for PLL clock to stabilise
- * - Disable the HSE
+ * - Disable the HSI
  * - Set the peripheral clock
  */
 void rcc_init(void) {
 
-  // Set up the max system clock frequency to 180 MHz
-  uint8_t sysclk_freq_mhz = RCC_MAX_SYSCLK_MHZ;
-
   // Set up the wait states for the flash memory
-  flash_config_wait_states(sysclk_freq_mhz);
+  flash_config_wait_states(RCC_MAX_SYSCLK_MHZ);
 
   // Enable HSE clock X1 on the ST-Link Debugger
   rcc_hse_enable();
 
-  // Disable the PLL
-  rcc_pll_disable();
-
   // Set up HSE clock as PLL source
-  rcc_pll_source(RCC_PLL_SRC_HSE);
+  rcc_pll_source(RCC_PLLCFGR_PLLSRC_HSE);
 
   // Set up the PLL clock source params
-  rcc_pll_config(sysclk_freq_mhz);
+  rcc_pll_config();
 
   // Enable the PLL
   rcc_pll_enable();
@@ -113,11 +84,159 @@ void rcc_init(void) {
   // Switch the system clock source to PLLP
   rcc_sysclk_set_source(RCC_SYSCLK_SRC_PLLP);
 
+  // Wait until the clock source is switched to PLLP
   while (RCC_CFGR_SWS_PLL != rcc_sysclk_get_source())
     ;
 
+  // Disable the HSI clock to save power
   rcc_hsi_disable();
 
+  // Set prescaler values for the APB1 and APB2 peripheral buses
   rcc_apb1_set_prescaler(RCC_APB1_DIV_4);
   rcc_apb2_set_prescaler(RCC_APB2_DIV_4);
+}
+
+uint32_t rcc_get_sysclk_freq(void) {
+  uint32_t sysclk_freq_mhz = 0U;
+
+  // Initialise the variables that will save values of respective bits from the RCC_PLLCFGR register
+  uint32_t PLLP = 0U;
+  uint32_t pllp_bits = 0U;
+  uint32_t PLLM = 0U;
+  uint32_t PLLN = 0U;
+
+  // Verify which clock source is used for system clock
+  switch (RCC->CFGR & RCC_CFGR_SWS) {
+  case RCC_CFGR_SWS_HSI:
+    sysclk_freq_mhz = RCC_HSI_FREQ;
+    break;
+
+  case RCC_CFGR_SWS_HSE:
+    sysclk_freq_mhz = RCC_HSE_FREQ;
+    break;
+
+  case RCC_CFGR_SWS_PLL:
+
+    /**
+      * Convert the PLLP factor as it is encoded [(0bxx + 1) * 2]
+      * 0b00 -> 0 -> 1 -> 2
+      * 0b01 -> 1 -> 2 -> 4
+      * 0b10 -> 2 -> 3 -> 6
+      * 0b11 -> 3 -> 4 -> 8
+      */
+    pllp_bits = (RCC->PLLCFGR & RCC_PLLCFGR_PLLP) >> RCC_PLLCFGR_PLLP_Pos;
+    PLLP = (pllp_bits + 1U) * 2U;
+    PLLM = (RCC->PLLCFGR & RCC_PLLCFGR_PLLM) >> RCC_PLLCFGR_PLLM_Pos;
+    PLLN = (RCC->PLLCFGR & RCC_PLLCFGR_PLLN) >> RCC_PLLCFGR_PLLN_Pos;
+
+    // If the PLL source is HSE
+    if ((RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC) == RCC_PLLCFGR_PLLSRC_HSE) {
+      sysclk_freq_mhz = (RCC_HSE_FREQ * PLLN) / (PLLP * PLLM);
+    }
+
+    // If the PLL source is HSI
+    if ((RCC->PLLCFGR & RCC_PLLCFGR_PLLSRC) == RCC_PLLCFGR_PLLSRC_HSI) {
+      sysclk_freq_mhz = (RCC_HSI_FREQ * PLLN) / (PLLP * PLLM);
+    }
+
+    break;
+
+  default:
+    sysclk_freq_mhz = 0U;
+    break;
+  }
+  return sysclk_freq_mhz;
+}
+
+uint32_t rcc_get_hclk_freq(void) {
+  uint32_t sysclk_freq_mhz = rcc_get_sysclk_freq();
+  uint16_t ahb_prescaler = 1U;
+  switch (RCC->CFGR & RCC_CFGR_HPRE) {
+  case RCC_CFGR_HPRE_DIV1:
+    ahb_prescaler = 1U;
+    break;
+  case RCC_CFGR_HPRE_DIV2:
+    ahb_prescaler = 2U;
+    break;
+  case RCC_CFGR_HPRE_DIV4:
+    ahb_prescaler = 4U;
+    break;
+  case RCC_CFGR_HPRE_DIV8:
+    ahb_prescaler = 8U;
+    break;
+  case RCC_CFGR_HPRE_DIV16:
+    ahb_prescaler = 16U;
+    break;
+  case RCC_CFGR_HPRE_DIV64:
+    ahb_prescaler = 64U;
+    break;
+  case RCC_CFGR_HPRE_DIV128:
+    ahb_prescaler = 128U;
+    break;
+  case RCC_CFGR_HPRE_DIV256:
+    ahb_prescaler = 256U;
+    break;
+  case RCC_CFGR_HPRE_DIV512:
+    ahb_prescaler = 512U;
+    break;
+
+  default:
+    return 0U;
+  }
+
+  return (sysclk_freq_mhz / ahb_prescaler);
+}
+
+uint32_t rcc_get_pclk1_freq(void) {
+  uint32_t hwclk_mhz = rcc_get_hclk_freq();
+  uint8_t apb1_prescaler = 1U;
+  switch (RCC->CFGR & RCC_CFGR_PPRE1) {
+  case RCC_CFGR_PPRE1_DIV1:
+    apb1_prescaler = 1U;
+    break;
+  case RCC_CFGR_PPRE1_DIV2:
+    apb1_prescaler = 2U;
+    break;
+  case RCC_CFGR_PPRE1_DIV4:
+    apb1_prescaler = 4U;
+    break;
+  case RCC_CFGR_PPRE1_DIV8:
+    apb1_prescaler = 8U;
+    break;
+  case RCC_CFGR_PPRE1_DIV16:
+    apb1_prescaler = 16U;
+    break;
+
+  default:
+    return 0U;
+  }
+
+  return (hwclk_mhz / apb1_prescaler);
+}
+
+uint32_t rcc_get_pclk2_freq(void) {
+  uint32_t hwclk_mhz = rcc_get_hclk_freq();
+  uint8_t apb2_prescaler = 1U;
+  switch (RCC->CFGR & RCC_CFGR_PPRE2) {
+  case RCC_CFGR_PPRE2_DIV1:
+    apb2_prescaler = 1U;
+    break;
+  case RCC_CFGR_PPRE2_DIV2:
+    apb2_prescaler = 2U;
+    break;
+  case RCC_CFGR_PPRE2_DIV4:
+    apb2_prescaler = 4U;
+    break;
+  case RCC_CFGR_PPRE2_DIV8:
+    apb2_prescaler = 8U;
+    break;
+  case RCC_CFGR_PPRE2_DIV16:
+    apb2_prescaler = 16U;
+    break;
+
+  default:
+    return 0U;
+  }
+
+  return (hwclk_mhz / apb2_prescaler);
 }
