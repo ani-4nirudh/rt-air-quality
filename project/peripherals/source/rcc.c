@@ -77,20 +77,40 @@ static void rcc_pll_config(uint8_t sysclk_freq_mhz) {
  * - Set SYSCLK
  * - Configure flash wait states
  * - Enable the HSE
+ * - Disable the PLL
  * - Configure the PLL as the clock source
+ * - Enable the PLL
  * - Wait for PLL clock to stabilise
  * - Disable the HSE
  * - Set the peripheral clock
  */
 void rcc_init(void) {
+
+  // Set up the max system clock frequency to 180 MHz
   uint8_t sysclk_freq_mhz = RCC_MAX_SYSCLK_MHZ;
+
+  // Set up the wait states for the flash memory
   flash_config_wait_states(sysclk_freq_mhz);
 
+  // Enable HSE clock X1 on the ST-Link Debugger
   rcc_hse_enable();
+
+  // Disable the PLL
+  rcc_pll_disable();
+
+  // Set up HSE clock as PLL source
   rcc_pll_source(RCC_PLL_SRC_HSE);
+
+  // Set up the PLL clock source params
   rcc_pll_config(sysclk_freq_mhz);
+
+  // Enable the PLL
   rcc_pll_enable();
+
+  // Set the prescaler for the AHB bus
   rcc_ahb_set_prescaler(RCC_SYSCLK_DIV_1);
+
+  // Switch the system clock source to PLLP
   rcc_sysclk_set_source(RCC_SYSCLK_SRC_PLLP);
 
   while (RCC_CFGR_SWS_PLL != rcc_sysclk_get_source())
