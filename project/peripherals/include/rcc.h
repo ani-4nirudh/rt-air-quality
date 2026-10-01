@@ -210,13 +210,6 @@ static inline uint32_t rcc_sysclk_get_source(void) {
 }
 
 /**
- * Disable the PLL before configuring
- */
-static inline void rcc_pll_disable(void) {
-  RCC->CR &= ~(RCC_CR_PLLON);
-}
-
-/**
  * Enables PLL and waits until ready.
  */
 static inline void rcc_pll_enable(void) {
