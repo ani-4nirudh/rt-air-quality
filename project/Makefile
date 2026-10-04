@@ -65,6 +65,10 @@ build: $(BUILD_DIR)/$(TARGET).out
 flash: $(BUILD_DIR)/$(TARGET).out
 	$(OPENOCD) -f rt_air_quality.cfg -c "program $(BUILD_DIR)/$(TARGET).out verify reset exit" -l $(LOG_DIR)/openocd.log 
 
+.PHONY: debug
+debug: flash
+	$(OPENOCD) -f rt_air_quality.cfg
+
 # Note: This is to create assembly for the final linked binary by disassembling the it and showing the original C code alongside the assembly
 .PHONY: $(TARGET).asm
 $(TARGET).asm: $(BUILD_DIR)/$(TARGET).out
