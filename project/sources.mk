@@ -8,6 +8,7 @@ LINKER_DIR := linker
 STARTUP_DIR := startup
 FREERTOS_DIR := middleware/FreeRTOS
 PERI_DIR := peripherals
+LOG_DIR := logs
 
 # Add filepath for the startup file
 STARTUP_SOURCE := $(wildcard $(STARTUP_DIR)/*.s)

@@ -63,7 +63,7 @@ build: $(BUILD_DIR)/$(TARGET).out
 
 .PHONY: flash
 flash: $(BUILD_DIR)/$(TARGET).out
-	$(OPENOCD) -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program $(BUILD_DIR)/$(TARGET).out verify reset exit"
+	$(OPENOCD) -f rt_air_quality.cfg -c "program $(BUILD_DIR)/$(TARGET).out verify reset exit" -l $(LOG_DIR)/openocd.log 
 
 # Note: This is to create assembly for the final linked binary by disassembling the it and showing the original C code alongside the assembly
 .PHONY: $(TARGET).asm
