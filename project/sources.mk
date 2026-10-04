@@ -9,6 +9,7 @@ STARTUP_DIR := startup
 FREERTOS_DIR := middleware/FreeRTOS
 PERI_DIR := peripherals
 LOG_DIR := logs
+GDB_INIT := .gdbinit
 
 # Add filepath for the startup file
 STARTUP_SOURCE := $(wildcard $(STARTUP_DIR)/*.s)

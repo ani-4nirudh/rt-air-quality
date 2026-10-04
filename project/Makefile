@@ -8,6 +8,9 @@ TARGET := main
 
 # Step 3: Setup flags based on platform
 CC := arm-none-eabi-gcc
+OBJDUMP := arm-none-eabi-objdump
+SIZE := arm-none-eabi-size
+GDB := arm-none-eabi-gdb
 OPENOCD := openocd
 LINKER_FLASH := -T $(LINKER_DIR)/STM32F446RETX_FLASH.ld
 CPU := -mcpu=cortex-m4
@@ -20,8 +23,6 @@ ARCH_FLAGS := -mthumb \
 							--specs=nano.specs
 CPPFLAGS :=
 LDFLAGS := $(LINKER_FLASH) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map
-OBJDUMP := arm-none-eabi-objdump
-SIZE := arm-none-eabi-size
 
 # Add warning flags
 WFLAGS = -Wall -Wpedantic -Wextra -Wshadow -Werror
@@ -65,9 +66,14 @@ build: $(BUILD_DIR)/$(TARGET).out
 flash: $(BUILD_DIR)/$(TARGET).out
 	$(OPENOCD) -f rt_air_quality.cfg -c "program $(BUILD_DIR)/$(TARGET).out verify reset exit" -l $(LOG_DIR)/openocd.log 
 
-.PHONY: debug
-debug: flash
+.PHONY: debug-server
+debug-server: flash
 	$(OPENOCD) -f rt_air_quality.cfg
+	@echo "Open a new terminal and type 'make debug'"
+
+.PHONY: debug
+debug: $(BUILD_DIR)/$(TARGET).out
+	$(GDB) $(BUILD_DIR)/$(TARGET).out -x $(GDB_INIT)
 
 # Note: This is to create assembly for the final linked binary by disassembling the it and showing the original C code alongside the assembly
 .PHONY: $(TARGET).asm
