@@ -13,6 +13,24 @@ cd project
 make build
 ```
 
+## Debug Instructions
+```
+make debug
+
+# Open a new terminal
+
+# Launch the executable and setup the remote connection with the board
+arm-none-eabi-gdb build/main.out
+target extended-remote localhost: 3333
+
+# gdb commands
+monitor reset halt
+load
+breakpoint main
+tui enable
+continue
+```
+
 ## Hardware
 
 
