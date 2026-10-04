@@ -15,20 +15,14 @@ make build
 
 ## Debug Instructions
 ```
+# Launch the debug server
+make debug-server
+
+# Open a new terminal window
+
+# Launch the gdb debugger
 make debug
 
-# Open a new terminal
-
-# Launch the executable and setup the remote connection with the board
-arm-none-eabi-gdb build/main.out
-target extended-remote localhost: 3333
-
-# gdb commands
-monitor reset halt
-load
-breakpoint main
-tui enable
-continue
 ```
 
 ## Hardware
