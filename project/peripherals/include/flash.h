@@ -6,8 +6,8 @@
  * @date 25th September 2026
  */
 
-#ifndef FLASH_H
-#define FLASH_H
+#ifndef INC_FLASH_H
+#define INC_FLASH_H
 
 #include <stdint.h>
 
