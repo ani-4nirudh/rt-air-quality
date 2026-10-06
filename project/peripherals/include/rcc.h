@@ -1,13 +1,13 @@
 /*
- * rcc.h
+ * @file rcc.h
  *
- * Provides macro definitions and function prototypes for RCC (Reset and Clock Control)
+ * @brief Provides macro definitions and function prototypes for RCC (Reset and Clock Control)
  * initialization and management within the MCU. This includes oscillator configurations,
  * system clock source selection, and bus prescaler options.
  */
 
-#ifndef INC_RCC_H_
-#define INC_RCC_H_
+#ifndef INC_RCC_H
+#define INC_RCC_H
 
 #include <stdbool.h>
 
