@@ -15,12 +15,12 @@ make build
 
 ## Debug Instructions
 ```
-# Launch the debug server
+# 1. Launch the debug server
 make debug-server
 
-# Open a new terminal window
+# 2. Open a new terminal window
 
-# Launch the gdb debugger
+# 3. Launch the gdb debugger
 make debug
 
 ```
