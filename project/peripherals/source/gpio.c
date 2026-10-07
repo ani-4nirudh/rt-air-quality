@@ -10,6 +10,10 @@
 #include "gpio_defs.h"
 #include "stm32f4xx.h"
 
+/**
+ * Private functions
+ */
+
 static void GPIO_set_pin_mode(GPIO_pin_config_s *gpio) {
   // Clear the 2 bit field by using an inverted mask
   gpio->port->MODER &= ~(3U << (2U * gpio->pin));
@@ -34,6 +38,7 @@ static void GPIO_set_output_speed(GPIO_pin_config_s *gpio) {
   // Clear the bit field by setting it to low speed
   gpio->port->OSPEEDR &= ~(3U << (2U * gpio->pin));
 
+  // Check if the pin is set to output mode and then set the bitfield
   if (gpio->pin_mode == GPIO_MODE_OUTPUT) {
     gpio->port->OSPEEDR |= (gpio->pin_output_speed << (2U * gpio->pin));
   }
@@ -49,13 +54,13 @@ static void GPIO_set_pull_resistor(GPIO_pin_config_s *gpio) {
 
 static void GPIO_set_alt_fn(GPIO_pin_config_s *gpio) {
   if (gpio->pin <= GPIO_PIN_7) {
-    // Clear the bit field
+    // Clear the bit field for the given pin inside AFRL register
     gpio->port->AFR[0] &= ~(15U << (4 * gpio->pin));
 
     // Set the alternate function
     gpio->port->AFR[0] |= (gpio->pin_alt_fn << (4 * gpio->pin));
   } else {
-    // Clear the bit field and subtract 8 as bit field for pin 8 is [3:0]
+    // Clear the bit field and subtract 8 as bit field for pin 8 is [3:0] for the AFRH register
     gpio->port->AFR[1] &= ~(15U << (4 * (gpio->pin - 8U)));
 
     // Set the alternate function
@@ -74,8 +79,14 @@ static void GPIO_set_config(GPIO_pin_config_s *gpio) {
   }
 }
 
+/**
+ * Public functions
+ */
 void GPIO_init(void) {
+  // Initialise the Port A clock
   RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+  // Configure the USER_LED object inside 'gpio_defs.c'
   GPIO_set_config(&USER_LED);
 }
 

@@ -116,27 +116,33 @@ typedef struct {
 
 /**
  * @brief Initiaise the GPIO pins
+ * This function will call the static functions inside the file 'gpio.c' to initialise the GPIO pins for a hardware device.
+ * For e.g., onboard LED, button, sensors
  */
 void GPIO_init(void);
 
 /**
- * @brief Reset the pin state
+ * @brief Reset the pin state. It is similar to setting the pin to LOW.
+ * @param gpio Pointer to the 'GPIO_pin_config_s' struct object
  */
 void GPIO_reset_pin(GPIO_pin_config_s *gpio);
 
 /**
- * @brief Set the GPIO pin
+ * @brief Set the GPIO pin. It is similar to setting a pin to HIGH.
+ * @param gpio Pointer to the 'GPIO_pin_config_s' struct object
  */
 void GPIO_set_pin(GPIO_pin_config_s *gpio);
 
 /**
  * @brief Check the pin state
+ * @param gpio Pointer to the 'GPIO_pin_config_s' struct object
  * @return Pin state
  */
 gpio_pin_state_e GPIO_read_pin(GPIO_pin_config_s *gpio);
 
 /**
  * @brief Toggle the desired pin (for e.g. the onboard LED)
+ * @param gpio Pointer to the 'GPIO_pin_config_s' struct object
  */
 void GPIO_toggle_pin(GPIO_pin_config_s *gpio);
 
