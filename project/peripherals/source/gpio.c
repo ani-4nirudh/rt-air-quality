@@ -16,6 +16,7 @@
 
 /**
  * Sets the GPIO pin mode (i/p, o/p, alternate function or analog)
+ *
  * @param gpio Pointer to the GPIO_pin_config_s struct object defined in file 'gpio_defs.c'
  */
 static void GPIO_set_pin_mode(GPIO_pin_config_s *gpio) {
@@ -107,6 +108,7 @@ static void GPIO_set_alt_fn(GPIO_pin_config_s *gpio) {
 
 /**
  * Combines all the functions mentioned above for easier pin configuration
+ *
  * @param gpio Pointer to the GPIO_pin_config_s struct object defined in file 'gpio_defs.c'
  */
 static void GPIO_set_config(GPIO_pin_config_s *gpio) {
@@ -120,6 +122,7 @@ static void GPIO_set_config(GPIO_pin_config_s *gpio) {
 /******************************************
  *********** Public functions *************
  *****************************************/
+
 void GPIO_init(void) {
   // Initialise the Port A clock
   RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
@@ -140,16 +143,16 @@ gpio_pin_state_e GPIO_read_pin(GPIO_pin_config_s *gpio) {
   gpio_pin_state_e pin_state;
   pin_state = (gpio->port->IDR & (1U << gpio->pin)); // Mask the register
   if (pin_state != 0) {                              // If the value after the masking is non-zero then that means the bit is set
-    return GPIO_PIN_SET;
+    return GPIO_PIN_SET;                             // Means pin state is HIGH
   }
-  return GPIO_PIN_RESET;
+  return GPIO_PIN_RESET; // Means pin state is LOW
 }
 
 void GPIO_toggle_pin(GPIO_pin_config_s *gpio) {
   gpio_pin_state_e pin_state = GPIO_read_pin(gpio);
-  if (pin_state == GPIO_PIN_SET) {
+  if (pin_state == GPIO_PIN_SET) { // If pin state is HIGH, turn it to LOW
     GPIO_reset_pin(gpio);
   } else {
-    GPIO_set_pin(gpio);
+    GPIO_set_pin(gpio); // vice versa
   }
 }
