@@ -6,6 +6,9 @@
  * @date 8th October 2026
  */
 
+#ifndef INC_ERROR_H
+#define INC_ERROR_H
+
 // Type definition to create functions with error codes
 typedef int error_t;
 
@@ -33,3 +36,5 @@ typedef enum {
   MODBUS_MUTEX_TIMEOUT = -19,
   MODBUS_MUTEX_UNLOCK_FAIL = -20,
 } error_e;
+
+#endif // !INC_ERROR_H
