@@ -11,11 +11,11 @@
 #include "rcc.h"
 #include "stm32f4xx.h"
 
-static void vStartBlinkingTask(void);
+static void vStartup(void);
 
 int main(void) {
   /**
-   * Initial RCC configuration test
+   * Initial RCC configuration
    */
   uint32_t system_clock = 0;
   uint32_t hclk = 0;
@@ -38,42 +38,36 @@ int main(void) {
    */
   SystemCoreClockUpdate();
 
+  /**
+   * Initialise the GPIO pins for different peripherals and USER_LED
+   */
   GPIO_init();
-  vStartBlinkingTask();
+
+  // Start the task
+  vStartup();
 
   // Start the FreeRTOS Scheduler
   vTaskStartScheduler();
-
-  /* Loop forever */
-  while (1) {
-  }
 }
 
-static void vBlinkingTask(void *param) {
+/**
+ * Creates the startup task used for FreeRTOS initialisations on startup
+ */
+static void vStartupTask(void *param) {
   (void)param;
+
   while (1) {
     GPIO_toggle_pin(&USER_LED);
     vTaskDelay(pdMS_TO_TICKS(500));
   }
+
+  // Delete startup task after creating other tasks
+  vTaskDelete(NULL);
 }
 
-static void vStartBlinkingTask(void) {
-  configASSERT(pdPASS == xTaskCreate(vBlinkingTask, "Blinking Task", configMINIMAL_STACK_SIZE, NULL, 1, NULL))
+/**
+ * Create startup task
+ */
+static void vStartup(void) {
+  configASSERT(pdPASS == xTaskCreate(vStartupTask, "Startup Task", STARTUP_TASK_STACK_SIZE, NULL, STARTUP_TASK_PRIORITY, NULL));
 }
-
-// /**
-//  * Creates the startup task used for FreeRTOS initialisations on startup
-//  */
-// static void startup_task(void *param) {
-//   (void)param;
-//
-//   // Delete startup task after creating other tasks
-//   vTaskDelete(NULL);
-// }
-//
-// /**
-//  * Create startup task
-//  */
-// static void startup(void) {
-//   configASSERT(pdPASS == xTaskCreate(startup_task, "Startup Task", STARTUP_TASK_STACK_SIZE, NULL, STARTUP_TASK_PRIORITY, NULL));
-// }
