@@ -2,8 +2,10 @@
 
 # Define directories
 BUILD_DIR := build
+CMSIS_DIR := cmsis
 COMMON_DIR := common
-SRC_DIR := core/source
+CORE_DIR := core
+CONFIG_DIR := config
 LINKER_DIR := linker
 STARTUP_DIR := startup
 FREERTOS_DIR := middleware/FreeRTOS
@@ -23,15 +25,16 @@ FREERTOS_SOURCES := $(wildcard $(FREERTOS_DIR)/Source/*.c \
 PERI_SOURCES := $(wildcard $(PERI_DIR)/source/*.c)
 
 # Add them together as the files have the same '.c' extension
-SOURCES := $(wildcard $(SRC_DIR)/*.c)
+SOURCES := $(wildcard $(CORE_DIR)/source/*.c)
 SOURCES += $(FREERTOS_SOURCES) $(PERI_SOURCES)
 
 # Add include files
-INCLUDES := -I./cmsis \
-						-I./config \
-						-I./core/include \
-						-I./core/source \
-						-I./peripherals/include \
-						-I./peripherals/source \
+INCLUDES := -I./$(CMSIS_DIR) \
+						-I ./$(COMMON_DIR)/include \
+						-I./$(CONFIG_DIR) \
+						-I./$(CORE_DIR)/include \
+						-I./$(CORE_DIR)/source \
+						-I./$(PERI_DIR)/include \
+						-I./$(PERI_DIR)/source \
 						-I$(FREERTOS_DIR)/Source/portable/GCC/ARM_CM4F \
 						-I$(FREERTOS_DIR)/Source/include/ 
