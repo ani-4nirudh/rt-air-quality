@@ -40,7 +40,8 @@ static void vErrorHandlerTaskStart(void) {
   vQueueAddToRegistry(xErrorHandlerQueue, "Error Handler Queue");
 
   // Start the vErrorHandlerTask
-  configASSERT(pdPASS == xTaskCreate(vErrorHandlerTask, "Error Handler Task", ERROR_TASK_STACK_SIZE, NULL, ERROR_TASK_STACK_PRIORITY, NULL));
+  configASSERT(pdPASS ==
+               xTaskCreate(vErrorHandlerTask, "Error Handler Task", ERROR_HANDLER_TASK_STACK_SIZE, NULL, ERROR_HANDLER_TASK_STACK_PRIORITY, NULL));
 }
 
 static void vErrorHandlerTask(void *param) {}

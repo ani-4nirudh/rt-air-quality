@@ -14,4 +14,10 @@
 // Highest priority that can be assigned to a task by FreeRTOS
 #define STARTUP_TASK_PRIORITY (configMAX_PRIORITIES - 1)
 
+/**
+ * Define Error Handling Task properties
+ */
+#define ERROR_HANDLER_TASK_STACK_SIZE (256)
+#define ERROR_HANDLER_TASK_STACK_PRIORITY (configMAX_PRIORITIES - 2)
+
 #endif // !FREERTOSTASKS_H_
