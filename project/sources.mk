@@ -4,13 +4,16 @@
 BUILD_DIR := build
 CMSIS_DIR := cmsis
 COMMON_DIR := common
-CORE_DIR := core
 CONFIG_DIR := config
-LINKER_DIR := linker
-STARTUP_DIR := startup
+CORE_DIR := core
 FREERTOS_DIR := middleware/FreeRTOS
-PERI_DIR := peripherals
+LINKER_DIR := linker
 LOG_DIR := logs
+PERI_DIR := peripherals
+STARTUP_DIR := startup
+TASKS_DIR := app_tasks
+
+# Define filenames
 GDB_INIT := .gdbinit
 
 # Add filepath for the startup file
@@ -30,11 +33,12 @@ SOURCES += $(FREERTOS_SOURCES) $(PERI_SOURCES)
 
 # Add include files
 INCLUDES := -I./$(CMSIS_DIR) \
-						-I ./$(COMMON_DIR)/include \
+						-I./$(COMMON_DIR)/include \
 						-I./$(CONFIG_DIR) \
 						-I./$(CORE_DIR)/include \
 						-I./$(CORE_DIR)/source \
+						-I./$(FREERTOS_DIR)/Source/portable/GCC/ARM_CM4F \
+						-I./$(FREERTOS_DIR)/Source/include \
 						-I./$(PERI_DIR)/include \
 						-I./$(PERI_DIR)/source \
-						-I$(FREERTOS_DIR)/Source/portable/GCC/ARM_CM4F \
-						-I$(FREERTOS_DIR)/Source/include/ 
+						-I./$(TASKS_DIR)/include
