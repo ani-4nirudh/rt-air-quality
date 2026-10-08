@@ -53,7 +53,7 @@ static void vBlinkingTask(void *param) {
   (void)param;
   while (1) {
     GPIO_toggle_pin(&USER_LED);
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(500));
   }
 }
 
