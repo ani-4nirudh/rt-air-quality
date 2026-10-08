@@ -1,6 +1,5 @@
-# Real-time Air Quality Sensor (In Progress)
-**WIP**
-*Please wait for the final instructions.*
+# Real-time Air Quality Sensor
+
 ## Overview
 
 ## Build Instructions
