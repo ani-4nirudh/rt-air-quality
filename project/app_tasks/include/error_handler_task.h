@@ -10,16 +10,22 @@
 #define INC_ERROR_HANDLER_TASK_H
 
 #include "FreeRTOSTasks.h"
+#include "error.h"
 
 /**
  * Define the number of LED blink cycles for a particular error event
  */
-#define EVT_BLINK_CYCLES (5)
+#define EVT_BLINK_CYCLES (2)
 
 /**
  * Define the delay in milliseconds for blinking
  */
-#define EVT_BLINK_DELAY (500)
+#define EVT_BLINK_DELAY (250)
+
+/**
+ * Queue length for the Error Handler Task
+ */
+#define QUEUE_LENGTH 10
 
 typedef enum {
   // System health analog watchdog threshold error
@@ -57,14 +63,14 @@ typedef enum {
  *
  * @param EVT_ERR_ID Event ID for the error message
  */
-void vErrorHandlerSendMsg(event_id_e EVT_ERR_ID);
+error_t vErrorHandlerSendMsg(event_id_e evt_err_id);
 
 /**
  * Sends an error message generated from the interrupt routine (ISR) to the Error Handler task by passing the Error ID
  *
  * @param EVT_ERR_ID Event ID for the error message
  */
-void vErrorHandlerSendMsgFromISR(event_id_e EVT_ERR_ID);
+error_t vErrorHandlerSendMsgFromISR(event_id_e evt_err_id);
 
 /**
  * Start the error handler FreeRTOS task
