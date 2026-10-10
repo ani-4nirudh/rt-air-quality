@@ -6,6 +6,8 @@
 
 #include "FreeRTOSConfig.h"
 #include "FreeRTOSTasks.h"
+#include "error.h"
+#include "error_handler_task.h"
 #include "gpio.h"
 #include "gpio_defs.h"
 #include "rcc.h"
@@ -43,10 +45,13 @@ int main(void) {
    */
   GPIO_init();
 
+  // Start the error task handler
+  vErrorHandlerTaskStart();
+
   // Start the task
   vStartup();
 
-  // Start the FreeRTOS Scheduler
+  // Start the FreeRTOS Scheduler (Has the HIGHEST priority)
   vTaskStartScheduler();
 }
 
@@ -56,10 +61,11 @@ int main(void) {
 static void vStartupTask(void *param) {
   (void)param;
 
-  while (1) {
-    GPIO_toggle_pin(&USER_LED);
-    vTaskDelay(pdMS_TO_TICKS(500));
-  }
+  vErrorHandlerSendMsg(EVT_MODBUS_DATA_UPDATE_HOLDING_REGS_FAIL);
+
+  // for (event_id_e error = EVT_SYS_HEALTH_AWDG_THRESH_EXCEEDED; error < EVT_TOTAL; error++) {
+  //   vErrorHandlerSendMsg(error);
+  // }
 
   // Delete startup task after creating other tasks
   vTaskDelete(NULL);
