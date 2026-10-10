@@ -27,9 +27,12 @@ FREERTOS_SOURCES := $(wildcard $(FREERTOS_DIR)/Source/*.c \
 # Add filepaths for peripherals
 PERI_SOURCES := $(wildcard $(PERI_DIR)/source/*.c)
 
+# Add filepath for TASKS_DIR
+TASKS_SOURCES := $(wildcard $(TASKS_DIR)/source/*.c)
+
 # Add them together as the files have the same '.c' extension
 SOURCES := $(wildcard $(CORE_DIR)/source/*.c)
-SOURCES += $(FREERTOS_SOURCES) $(PERI_SOURCES)
+SOURCES += $(FREERTOS_SOURCES) $(PERI_SOURCES) $(TASKS_SOURCES)
 
 # Add include files
 INCLUDES := -I./$(CMSIS_DIR) \
